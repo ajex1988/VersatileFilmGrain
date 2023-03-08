@@ -62,6 +62,7 @@ void yuv_free(yuv* frame);
 void yuv_pad(yuv* frame);
 int  yuv_skip(yuv* frame, int n, FILE* file);
 int  yuv_read(yuv* frame, FILE* file);
+int yuv_read_from_array(yuv* frame, void* yc, void* uc, void* vc);
 int  yuv_write(yuv* frame, FILE* file);
 void yuv_to_8bit(yuv* dst, const yuv* src);
 

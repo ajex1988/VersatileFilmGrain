@@ -37,6 +37,7 @@
 #include "yuv.h"
 #include <stdint.h>
 #include <assert.h>
+#include <string.h>
 
 #ifdef _MSC_VER
 #include <malloc.h>
@@ -175,6 +176,28 @@ static int yuv_read_comp(void* buffer, FILE* file, int width, int height, int st
 	}
 
 	return err;
+}
+
+static int yuv_read_comp_from_array(void* buffer, void* channel, int width, int height, int stride, int depth)
+{
+    uint8* buf8 = buffer;
+    uint8* p = channel;
+    int sz = (depth == 8) ? 1 : 2;
+    for (int i = 0;  i < height; i++) {
+        memcpy(buf8, p, sz*width);
+        buf8 += stride*sz;
+        p += width*sz;
+    }
+    return 0;
+}
+
+int yuv_read_from_array(yuv* frame, void* yc, void* uc, void* vc)
+{
+    yuv_read_comp_from_array(frame->Y, yc, frame->width, frame->height, frame->stride, frame->depth);
+    yuv_read_comp_from_array(frame->U, uc, frame->cwidth, frame->cheight, frame->cstride, frame->depth);
+    yuv_read_comp_from_array(frame->V, vc, frame->cwidth, frame->cheight, frame->cstride, frame->depth);
+
+    return 0;
 }
 
 int yuv_read(yuv* frame, FILE* file)
