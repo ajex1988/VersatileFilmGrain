@@ -62,8 +62,8 @@ static FILE* fsrc = NULL;
 static FILE* fdst = NULL;
 static int width = 1920;
 static int height = 1080;
-static int depth = 10;
-static int odepth = 0;
+static int depth = 8;
+static int odepth = 8;
 static int frames = 0;
 static int seek = 0;
 static int format = YUV_420;
@@ -174,11 +174,11 @@ static int read_format(const char* s)
     else                            return YUV_420;
 }
 
-static const char* format_str(int format)
+static const char* format_str(int fmt)
 {
-    if      (format == YUV_420) return "420";
-    else if (format == YUV_422) return "422";
-    else if (format == YUV_444) return "444";
+    if      (fmt == YUV_420) return "420";
+    else if (fmt == YUV_422) return "422";
+    else if (fmt == YUV_444) return "444";
     else                        return "???";
 }
 
@@ -376,12 +376,12 @@ static void vfgs_add_grain(yuv* frame)
     }
 }
 
-uint8* vfgs(uint8* py, uint8* pu, uint8* pv, int h, int w, float grain_strength)
+uint8* vfgs(uint8* py, uint8* pu, uint8* pv, int h, int w, int grain_strength)
 {
-    int i;
-    int err=0;
+    height = h;
+    width = w;
     yuv frame, oframe;
-    unsigned gain = 100;
+    unsigned gain = grain_strength;
 
     if (check_cfg())
     {
@@ -402,35 +402,31 @@ uint8* vfgs(uint8* py, uint8* pu, uint8* pv, int h, int w, float grain_strength)
     vfgs_init_sei(&sei);
 
     yuv_alloc(width, height, depth, format, &frame);
+    // Debug info
+    printf("Inside frame. height: %d, width:%d, stride: %d, cheight: %d, cwidth: %d, cstride: %d",
+           frame.height, frame.width, frame.stride, frame.cheight, frame.cwidth, frame.cstride);
+
     if (odepth < depth)
         yuv_alloc(width, height, odepth, format, &oframe);
     else
         oframe = frame;
 
 //    yuv_skip(&frame, seek, fsrc);
+    // Debug info
+    printf("Height: %d, Width:%d, Depth: %d, ODepth: %d, Format: %d",height, width,depth, odepth, format);
 
     // Add grain
     yuv_read_from_array(&frame, py, pu, pv);
     vfgs_add_grain(&frame);
-    yuv_write_to_array(&oframe, fdst);
+    uint8* p_out = malloc(h*w*3);
+    yuv_write_to_array(&oframe, p_out);
     yuv_free(&frame);
     if (odepth < depth)
         yuv_free(&oframe);
 
-    return 0;
-
-//    for (int n = 0; ((frames == 0) || (n < frames)) && !ferror(fsrc); n++)
-//    {
-//        yuv_read(&frame, fsrc);
-//        if (feof(fsrc))
-//            break;
-//        //yuv_pad(&frame);
-//        vfgs_add_grain(&frame);
-//        if (odepth < depth)
-//            yuv_to_8bit(&oframe, &frame);
-//        yuv_write(&oframe, fdst);
-//    }
-
-
+    return p_out;
 }
 
+void free_mem(uint8* p) {
+    free(p);
+}

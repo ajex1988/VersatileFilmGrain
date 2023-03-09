@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-EXPORT_SYMBOL unsigned char*  vfgs(unsigned char* py, unsigned char* pu, unsigned char* pc, int h, int w, float grain_strength);
+EXPORT_SYMBOL unsigned char*  vfgs(unsigned char* py, unsigned char* pu, unsigned char* pc, int h, int w, int grain_strength);
 
 EXPORT_SYMBOL void  free_mem(unsigned char* p);
 #ifdef __cplusplus

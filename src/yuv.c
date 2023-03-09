@@ -236,6 +236,29 @@ int yuv_write(yuv* frame, FILE* file)
 	return err;
 }
 
+static int yuv_write_comp_to_array(void* buffer, void* dst, int width, int height, int stride, int depth) {
+    uint8* buf8 = buffer;
+    int sz = (depth == 8) ? 1 : 2;
+
+    for (int i=0; i<height; i++)
+    {
+        memcpy(dst,buf8, width*sz);
+        buf8 += stride*sz;
+        dst += width*sz;
+    }
+    return 0;
+}
+int yuv_write_to_array(yuv* frame, void* p_array)
+{
+    uint8* p_array_y = p_array;
+    uint8* p_array_u = p_array+frame->width*frame->height;
+    uint8* p_array_v = p_array_u+frame->cwidth*frame->cheight;
+    yuv_write_comp_to_array(frame->Y, p_array_y, frame->width, frame->height, frame->stride, frame->depth);
+    yuv_write_comp_to_array(frame->U, p_array_u, frame->cwidth, frame->cheight, frame->cstride, frame->depth);
+    yuv_write_comp_to_array(frame->V, p_array_v, frame->cwidth, frame->cheight, frame->cstride, frame->depth);
+    return 0;
+}
+
 void yuv_to_8bit(yuv* dst, const yuv* src)
 {
 	uint8* buf8;
