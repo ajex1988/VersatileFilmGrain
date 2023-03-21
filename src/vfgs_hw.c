@@ -37,6 +37,7 @@
 #include "vfgs_hw.h"
 #include <string.h> // memcpy
 #include <assert.h>
+#include <stdio.h>
 
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -340,6 +341,8 @@ void vfgs_set_seed(uint32 seed)
 
 void vfgs_set_scale_shift(int shift)
 {
+    shift=5;
+    printf("shift=%d\n", shift);
 	assert(shift >= 2 && shift < 8);
 	scale_shift = shift + 6 - bs;
 }
